@@ -9,6 +9,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Platform: Ubuntu](https://img.shields.io/badge/Platform-Ubuntu%2022.04%20%7C%2024.04%20%7C%2026.04-orange.svg)](#)
 [![Virtualization: Proxmox](https://img.shields.io/badge/Virtualization-Proxmox%20VE-E57000.svg)](proxmox.md)
+[![Architecture: Multi-Node](https://img.shields.io/badge/Architecture-Multi--Node%20Deploy-purple.svg)](multi-node-deployment.md)
 [![Mesh VPN: Tailscale](https://img.shields.io/badge/VPN-Tailscale-24292e.svg)](https://tailscale.com)
 
 </div>
@@ -34,6 +35,9 @@ sudo bash tune-server.sh
 
 * **[Proxmox VE Setup Guide (`proxmox.md`)](proxmox.md)**  
   Guide for deploying dedicated agent nodes in Proxmox VE using lightweight unprivileged **LXC containers** (with Docker nesting & Tailscale tun pass-through) or **KVM VMs** (with Cloud-Init & GPU passthrough). Includes host-level optimizations.
+
+* **[Multi-Node LAN Deployment Architecture (`multi-node-deployment.md`)](multi-node-deployment.md)**  
+  Dynamic architecture guide for decoupling **Development / Agent Nodes** from **Production / Database Nodes** on LAN or Tailscale. Covers zero-password SSH key auth, remote Docker contexts (`docker --context`), and GitOps webhooks.
 
 * **[Automated Tuning Script (`tune-server.sh`)](tune-server.sh)**  
   One-click bash script to disable bloat daemons, install Docker, configure in-memory ZRAM swap, install agent CLI utilities (`ripgrep`, `fd`, `fzf`, `ncdu`, `tree`), and ensure continuous operation.
