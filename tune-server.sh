@@ -4,8 +4,11 @@ set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 echo "======================================================"
-echo " Starting Server Tuning & Optimization for T3 Code Box"
+echo " Starting Server Tuning & Optimization for Agent Box "
 echo "======================================================"
+
+TARGET_USER="${SUDO_USER:-$(logname 2>/dev/null || id -un)}"
+echo "Target user: ${TARGET_USER}"
 
 # 1. Stop and disable unneeded background services
 echo "[1/6] Disabling unneeded background daemons..."
@@ -29,7 +32,7 @@ if snap list lxd &>/dev/null; then
     snap remove lxd || true
 fi
 
-# 3. Prevent sleep on lid close permanently
+# 3. Prevent sleep on lid close permanently (for laptop servers)
 echo "[3/6] Ensuring lid close does not suspend server..."
 mkdir -p /etc/systemd/logind.conf.d
 cat << 'EOF' > /etc/systemd/logind.conf.d/ignore-lid.conf
@@ -73,18 +76,17 @@ if ! command -v docker >/dev/null; then
     systemctl enable --now docker
 fi
 
-TARGET_USER="nemo"
 if id "$TARGET_USER" &>/dev/null; then
     usermod -aG docker "$TARGET_USER"
     echo "Added $TARGET_USER to docker group."
 fi
 
-# 6. Ensure passwordless sudo remains in place for user nemo
-echo "[6/6] Ensuring passwordless sudo is configured..."
-cat << EOF > /etc/sudoers.d/nemo
-$TARGET_USER ALL=(ALL) NOPASSWD:ALL
+# 6. Ensure passwordless sudo is configured for non-interactive agent execution
+echo "[6/6] Ensuring passwordless sudo is configured for $TARGET_USER..."
+cat << EOF > "/etc/sudoers.d/${TARGET_USER}"
+${TARGET_USER} ALL=(ALL) NOPASSWD:ALL
 EOF
-chmod 0440 /etc/sudoers.d/nemo
+chmod 0440 "/etc/sudoers.d/${TARGET_USER}"
 
 echo "======================================================"
 echo " Server tuning complete! "
