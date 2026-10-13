@@ -8,21 +8,43 @@ This setup allows an **Agent / Development Node** (where you and your AI coding 
 
 ## 1. Architecture Overview
 
-```
-                      [ Local LAN Switch / Tailscale ]
-                                      │
-            ┌─────────────────────────┴─────────────────────────┐
-            ▼                                                   ▼
-┌───────────────────────────────┐               ┌───────────────────────────────┐
-│       DEV / AGENT NODE        │               │      DEPLOYMENT / PROD NODE   │
-│         ($DEV_HOST)           │               │         ($PROD_HOST)          │
-├───────────────────────────────┤               ├───────────────────────────────┤
-│ • AI Coding Agents (T3 Code,  │               │ • Production Containers       │
-│   Claude Code, Codex)         │               │ • Database (Supabase, Postgres)│
-│ • Local test runners & builds │ ── Deploy ──> │ • Reverse Proxy (Caddy, Traefik)│
-│ • Git workspaces & worktrees  │   (< 1ms LAN) │ • Docker Engine & Compose     │
-│ • Ed25519 Deployment Key      │               │ • Authorized Keys & Docker Grp│
-└───────────────────────────────┘               └───────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph DEV["Dev / Agent Node ($DEV_HOST)"]
+        direction TB
+        AGENTS["AI Coding Agents (T3 Code, Claude, Codex)"]
+        WORKSPACE["Workspaces, AST Parsers & Test Runners"]
+        SSH_KEY["Deployment Keypair (~/.ssh/agent_deploy)"]
+        AGENTS --> WORKSPACE
+        WORKSPACE --> SSH_KEY
+    end
+
+    subgraph NET["Sub-Millisecond Interconnect"]
+        direction TB
+        SWITCH["Local Gigabit Switch / Ethernet"]
+        TS_MESH["Tailscale Encrypted WireGuard Mesh"]
+    end
+
+    subgraph PROD["Production / Target Node ($PROD_HOST)"]
+        direction TB
+        DOCKER["Docker Engine (User in 'docker' group)"]
+        PROXY["Reverse Proxy (Caddy / Traefik / Nginx)"]
+        DB["Database Services (Supabase / PostgreSQL)"]
+        APPS["Live Web Apps & Containerized Services"]
+        DOCKER --> APPS
+        DOCKER --> DB
+        PROXY --> APPS
+    end
+
+    DEV --> NET
+    NET --> PROD
+
+    classDef devBox fill:#2b6cb0,stroke:#3182ce,color:#fff,stroke-width:2px;
+    classDef netBox fill:#2d3748,stroke:#4a5568,color:#fff,stroke-width:2px;
+    classDef prodBox fill:#285e61,stroke:#319795,color:#fff,stroke-width:2px;
+    class DEV devBox;
+    class NET netBox;
+    class PROD prodBox;
 ```
 
 ### Why Decouple Development from Production?
@@ -75,6 +97,26 @@ docker ps
 ---
 
 ## 3. Dynamic Deployment Strategies
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Developer as Developer / Agent
+    participant DevNode as Dev Node ($DEV_HOST)
+    participant Auth as SSH Key (~/.ssh/agent_deploy)
+    participant RemoteHost as Production Node ($PROD_HOST)
+    participant Containers as Docker Containers
+
+    Developer->>DevNode: Trigger project deployment
+    DevNode->>Auth: Sign request using Ed25519
+    Auth->>RemoteHost: Cryptographic SSH handshake (No password prompt)
+    Note over RemoteHost: User belongs to docker group (No sudo prompt)
+    DevNode->>RemoteHost: docker --context prod-node compose up -d --build
+    RemoteHost->>Containers: Build images & perform rolling restart
+    Containers-->>RemoteHost: Containers Healthy (Port 80/443 active)
+    RemoteHost-->>DevNode: Exit code 0 + Stream build logs
+    DevNode-->>Developer: Deployment verified successfully
+```
 
 Choose the deployment method that fits your workflow:
 

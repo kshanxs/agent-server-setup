@@ -9,14 +9,32 @@ A complete, production-ready guide to configuring a fresh **Ubuntu Server** (or 
 If you want to run everything at once on a fresh machine, copy and run this unified script as root (or with `sudo`):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/your-username/server-setup/main/tune-server.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/kshanxs/agent-server-setup/main/tune-server.sh | sudo bash
 ```
 
 *(Or follow the step-by-step sections below for full visibility and control).*
 
 ---
 
-## 2. Step-by-Step Setup
+## 2. Setup Pipeline Overview
+
+```mermaid
+flowchart TD
+    S1["1. Base Packages & Non-Interactive Sudo"] --> S2["2. Hardware Tuning, Lid Policy & ZRAM Swap"]
+    S2 --> S3["3. Private Mesh Network (Tailscale)"]
+    S3 --> S4["4. Containers (Docker Engine & Compose v2)"]
+    S4 --> S5["5. Language Runtimes (Vite+, Node.js, Bun, uv)"]
+    S5 --> S6["6. AI Coding Agents (T3 Code, Claude Code, Codex)"]
+    S6 --> S7["7. CLI Accelerators (ripgrep, fd, fzf, btop, tmux)"]
+    S7 --> S8["8. Systemd Service Daemon & Verification"]
+
+    classDef step fill:#2d3748,stroke:#4a5568,color:#f7fafc,stroke-width:2px;
+    class S1,S2,S3,S4,S5,S6,S7,S8 step;
+```
+
+---
+
+## 3. Step-by-Step Setup
 
 ### Step 1: Base System Update & Essential Packages
 Update package lists, upgrade existing packages, and install foundational build and network utilities:
@@ -291,7 +309,7 @@ fi
 
 ---
 
-## 3. System Verification Checklist
+## 4. System Verification Checklist
 
 Run this quick command block to verify every tool in the stack:
 
@@ -316,7 +334,7 @@ echo "========================="
 
 ---
 
-## 4. Maintenance & Useful Commands
+## 5. Maintenance & Useful Commands
 
 | Task | Command |
 | :--- | :--- |

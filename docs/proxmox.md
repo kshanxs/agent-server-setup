@@ -6,6 +6,39 @@ A battle-tested guide for running dedicated **AI Agent nodes** (T3 Code, Claude 
 
 ## 1. LXC Container vs. KVM VM: Which to Choose?
 
+```mermaid
+flowchart TD
+    HOST["Proxmox VE Physical Host"] --> DECISION{"Select Node Strategy"}
+
+    DECISION -->|Max Density & Low Overhead| LXC["Option A: Unprivileged LXC Container"]
+    DECISION -->|Full Kernel Isolation & GPU| KVM["Option B: KVM Virtual Machine"]
+
+    subgraph LXC_FEATURES["LXC Features & Tuning"]
+        L1["Features: nesting=1 (Docker runtime inside LXC)"]
+        L2["Features: keyctl=1 (Credential & systemd support)"]
+        L3["Passthrough: /dev/net/tun (WireGuard / Tailscale)"]
+    end
+
+    subgraph KVM_FEATURES["KVM VM Features & Tuning"]
+        K1["Automated Cloud-Init Template (Ubuntu Noble)"]
+        K2["VirtIO SCSI Single with SSD Discard & Emulation"]
+        K3["PCIe Passthrough (NVIDIA / AMD Local Inference)"]
+    end
+
+    LXC --> LXC_FEATURES
+    KVM --> KVM_FEATURES
+
+    LXC_FEATURES --> TARGET["Standardized Agent Server Stack (T3 Code + Docker + Tailscale)"]
+    KVM_FEATURES --> TARGET
+
+    classDef host fill:#1a202c,stroke:#e53e3e,color:#fff,stroke-width:2px;
+    classDef branch fill:#2d3748,stroke:#4a5568,color:#fff,stroke-width:2px;
+    classDef leaf fill:#2c5282,stroke:#3182ce,color:#fff,stroke-width:2px;
+    class HOST host;
+    class LXC,KVM branch;
+    class TARGET leaf;
+```
+
 | Feature | LXC Container | KVM Virtual Machine |
 | :--- | :--- | :--- |
 | **Overhead** | Almost zero (shares host kernel) | Low (~1-2 GB base RAM overhead) |
@@ -128,7 +161,7 @@ cd agent-server-setup
 # 2. Run the tuning script
 sudo bash tune-server.sh
 
-# 3. Follow setup.md for Tailscale and T3 Code service
+# 3. Follow docs/setup.md for Tailscale and T3 Code service
 ```
 
 ---
