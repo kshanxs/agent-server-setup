@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="assets/icon.svg" width="80" height="80" alt="Agent Server Setup Logo">
-
 # Agent Server Setup
 
 **Turn any Ubuntu Server, homelab box, laptop, or Proxmox instance into a dedicated, high-performance remote AI coding agent workstation.**
@@ -98,12 +96,10 @@ agent-server-setup/
 ├── tune-server.sh                # Root execution wrapper
 ├── scripts/
 │   └── tune-server.sh            # Automated server tuning & provisioning script
-├── docs/
-│   ├── setup.md                  # Comprehensive Ubuntu bare-metal setup guide
-│   ├── proxmox.md                # Proxmox VE (LXC & VM) deployment guide
-│   └── multi-node-deployment.md  # Dynamic multi-node LAN deployment guide
-└── assets/
-    └── icon.svg                  # Project logo and branding
+└── docs/
+    ├── setup.md                  # Comprehensive Ubuntu bare-metal setup guide
+    ├── proxmox.md                # Proxmox VE (LXC & VM) deployment guide
+    └── multi-node-deployment.md  # Dynamic multi-node LAN deployment guide
 ```
 
 ---
