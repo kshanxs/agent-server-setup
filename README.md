@@ -44,7 +44,7 @@ flowchart TD
 
         subgraph Accelerators["CLI & System Accelerators"]
             SEARCH["ripgrep & fd-find"]
-            TERM["tmux, fzf & btop"]
+            TERM["tmux, fzf, fastfetch & btop"]
             ZRAM["ZRAM (Compressed In-Memory Swap)"]
             LID["Lid Protection (No Suspend on Close)"]
         end
@@ -111,7 +111,7 @@ agent-server-setup/
 | **[Ubuntu Server Setup Guide](docs/setup.md)** | End-to-end installation walkthrough covering base packages, non-interactive sudo, laptop lid policies, ZRAM swap, Docker, Tailscale, runtimes (`uv`, `vite-plus`), and AI agents (**T3 Code**, **Claude Code**, **Codex**). | Bare-metal servers, repurposed laptops, mini-PCs |
 | **[Proxmox VE Setup Guide](docs/proxmox.md)** | Guide for deploying dedicated agent nodes in Proxmox VE using lightweight unprivileged **LXC containers** (with Docker nesting & Tailscale tun pass-through) or **KVM VMs** (with Cloud-Init & GPU passthrough). Includes host optimizations. | Homelabs, hypervisors, VM clusters |
 | **[Multi-Node LAN Deployment](docs/multi-node-deployment.md)** | Dynamic architecture guide for decoupling **Development / Agent Nodes** from **Production / Database Nodes** on LAN or Tailscale. Covers zero-password SSH key auth, remote Docker contexts (`docker --context`), and GitOps webhooks. | Multi-machine LANs, dedicated DB/App split |
-| **[Automated Tuning Script](scripts/tune-server.sh)** | One-click bash script to disable bloat daemons, install Docker, configure in-memory ZRAM swap, install agent CLI utilities (`ripgrep`, `fd`, `fzf`, `ncdu`, `tree`), and ensure continuous operation. | Fast automated provisioning |
+| **[Automated Tuning Script](scripts/tune-server.sh)** | One-click bash script to disable bloat daemons, install Docker, configure in-memory ZRAM swap, install agent CLI utilities (`ripgrep`, `fd`, `fzf`, `fastfetch`, `neofetch`, `ncdu`, `tree`), and ensure continuous operation. | Fast automated provisioning |
 
 ---
 
@@ -132,6 +132,7 @@ agent-server-setup/
 | **CLI Accelerators** | **ripgrep (`rg`)** | Blazing-fast symbol and pattern search across large codebases |
 | | **fd-find (`fd`)** | Smart, fast directory and file finding |
 | | **fzf** | Interactive command-line fuzzy finder |
+| | **fastfetch & neofetch**| Instant system and hardware information fetchers |
 | | **btop & htop** | Visual real-time CPU, memory, and process tree monitors |
 | | **tmux** | Terminal multiplexer for persistent sessions |
 

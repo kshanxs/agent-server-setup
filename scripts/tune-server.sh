@@ -45,8 +45,8 @@ EOF
 # Reload logind config safely without dropping active sessions
 systemctl kill -s HUP systemd-logind 2>/dev/null || true
 
-# 4. Install essential CLI tools & zram-tools
-echo "[4/6] Installing CLI utilities (ripgrep, fd, fzf, ncdu, tree) & zram-tools..."
+# 4. Install essential CLI tools, system info fetchers & zram-tools
+echo "[4/6] Installing CLI utilities (ripgrep, fd, fzf, ncdu, tree, fastfetch, neofetch) & zram-tools..."
 apt-get update -y
 apt-get install -y --no-install-recommends \
     ripgrep \
@@ -54,11 +54,18 @@ apt-get install -y --no-install-recommends \
     fzf \
     ncdu \
     tree \
+    fastfetch \
     zram-tools
 
 # Symlink fdfind -> fd for standard usage
 if command -v fdfind >/dev/null && ! command -v fd >/dev/null; then
     ln -sf "$(command -v fdfind)" /usr/local/bin/fd
+fi
+
+# Install neofetch standalone script if not present
+if ! command -v neofetch >/dev/null; then
+    curl -fsSL https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
+    chmod +x /usr/local/bin/neofetch
 fi
 
 # Configure zram for in-memory compressed swap (50% RAM, zstd compression)

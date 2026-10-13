@@ -25,7 +25,7 @@ flowchart TD
     S3 --> S4["4. Containers (Docker Engine & Compose v2)"]
     S4 --> S5["5. Language Runtimes (Vite+, Node.js, Bun, uv)"]
     S5 --> S6["6. AI Coding Agents (T3 Code, Claude Code, Codex)"]
-    S6 --> S7["7. CLI Accelerators (ripgrep, fd, fzf, btop, tmux)"]
+    S6 --> S7["7. CLI Accelerators & Info (ripgrep, fd, fzf, fastfetch, neofetch, btop)"]
     S7 --> S8["8. Systemd Service Daemon & Verification"]
 
     classDef step fill:#2d3748,stroke:#4a5568,color:#f7fafc,stroke-width:2px;
@@ -275,9 +275,9 @@ systemctl --user status t3-serve.service
 
 ---
 
-### Step 7: Essential Productivity & Agent Utilities
+### Step 7: Essential Productivity, System Info & Agent Utilities
 
-Install fast search, navigation, terminal multiplexing, and resource monitoring tools that enhance agent efficiency:
+Install fast search, navigation, system info profiling, terminal multiplexing, and resource monitoring tools that enhance agent efficiency:
 
 ```bash
 sudo apt install -y --no-install-recommends \
@@ -290,15 +290,24 @@ sudo apt install -y --no-install-recommends \
     jq \
     btop \
     htop \
-    powertop
+    powertop \
+    fastfetch
 
 # Symlink fdfind to fd for standard CLI compatibility
 if command -v fdfind >/dev/null && ! command -v fd >/dev/null; then
     sudo ln -sf "$(command -v fdfind)" /usr/local/bin/fd
 fi
+
+# Install neofetch standalone script (neofetch was archived upstream, fastfetch is its modern high-speed C successor)
+if ! command -v neofetch >/dev/null; then
+    sudo curl -fsSL https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
+    sudo chmod +x /usr/local/bin/neofetch
+fi
 ```
 
-#### Why These Specific Tools Matter for AI Agents:
+#### Why These Specific Tools Matter for AI Agents & Admins:
+* **`fastfetch`**: Blazing-fast modern C system information fetcher with instant terminal rendering of CPU, GPU, memory, and OS metrics.
+* **`neofetch`**: Iconic classic system information profiling tool.
 * **`ripgrep` (`rg`)**: Search massive codebases in milliseconds. AI agents use this heavily for symbol & pattern discovery.
 * **`fd-find` (`fd`)**: Fast, intelligent alternative to `find` with default `.gitignore` awareness.
 * **`fzf`**: Interactive fuzzy finder for navigating paths, commands, and git commits.
@@ -327,6 +336,8 @@ printf "%-15s: %s\n" "Codex" "$(codex --version 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "T3 Code Service" "$(systemctl --user is-active t3-serve.service 2>/dev/null || echo 'Inactive')"
 printf "%-15s: %s\n" "ripgrep (rg)" "$(rg --version 2>/dev/null | head -n1 || echo 'Missing')"
 printf "%-15s: %s\n" "fd" "$(fd --version 2>/dev/null || echo 'Missing')"
+printf "%-15s: %s\n" "fastfetch" "$(fastfetch --version 2>/dev/null || echo 'Missing')"
+printf "%-15s: %s\n" "neofetch" "$(neofetch --version 2>/dev/null | head -n1 || echo 'Missing')"
 printf "%-15s: %s\n" "btop" "$(which btop 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "ZRAM Swap" "$(cat /proc/swaps | grep zram >/dev/null && echo 'Active' || echo 'Inactive')"
 echo "========================="
@@ -338,6 +349,7 @@ echo "========================="
 
 | Task | Command |
 | :--- | :--- |
+| **System Info Summary** | `fastfetch` or `neofetch` |
 | **Check Resource Usage** | `btop` or `htop` |
 | **Monitor T3 Code Server Logs** | `journalctl --user -u t3-serve.service -f` |
 | **Restart T3 Code Server** | `systemctl --user restart t3-serve.service` |
