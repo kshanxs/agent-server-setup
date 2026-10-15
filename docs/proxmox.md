@@ -155,11 +155,11 @@ Once logged into your LXC or VM, run the setup steps to provision the full AI co
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/kshanxs/agent-server-setup.git
-cd agent-server-setup
+git clone https://github.com/kshanxs/servermaxxing.git
+cd servermaxxing
 
 # 2. Run the tuning script
-sudo bash tune-server.sh
+sudo bash servermaxxing.sh
 
 # 3. Follow docs/setup.md for Tailscale and T3 Code service
 ```

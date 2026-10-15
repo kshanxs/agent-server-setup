@@ -9,7 +9,7 @@ A complete, production-ready guide to configuring a fresh **Ubuntu Server** (or 
 If you want to run everything at once on a fresh machine, copy and run this unified script as root (or with `sudo`):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kshanxs/agent-server-setup/main/tune-server.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/servermaxxing.sh | sudo bash
 ```
 
 *(Or follow the step-by-step sections below for full visibility and control).*
@@ -66,10 +66,14 @@ sudo chmod 0440 /etc/sudoers.d/$USER
 
 ### Step 2: Hardware, Power & Memory Tuning
 
-#### 1. Prevent Sleep on Lid Close (For Laptop Servers)
-If running Ubuntu on a laptop, configure `systemd-logind` to ignore lid-close switches so the server remains active 24/7:
+#### 1. 24/7 Never-Sleep & Battery Longevity Tuning (For Laptop Servers)
+If running Ubuntu on a laptop, configure `systemd` to completely prevent suspension, ignore lid closes across AC and battery, keep Wi-Fi awake, and protect the battery against swelling under continuous wall power:
 
 ```bash
+# 1. Mask systemd sleep & suspend targets completely
+sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+
+# 2. Configure systemd-logind to ignore lid-close across all power states
 sudo mkdir -p /etc/systemd/logind.conf.d
 cat << 'EOF' | sudo tee /etc/systemd/logind.conf.d/ignore-lid.conf
 [Login]
@@ -78,8 +82,22 @@ HandleLidSwitchExternalPower=ignore
 HandleLidSwitchDocked=ignore
 LidSwitchIgnoreInhibited=no
 EOF
-
 sudo systemctl kill -s HUP systemd-logind 2>/dev/null || true
+
+# 3. Disable Wi-Fi power saving (prevents high latency & SSH/Tailscale drops over Wi-Fi)
+sudo mkdir -p /etc/NetworkManager/conf.d
+cat << 'EOF' | sudo tee /etc/NetworkManager/conf.d/default-wifi-powersave-on.conf
+[connection]
+wifi.powersave = 2
+EOF
+sudo systemctl reload NetworkManager 2>/dev/null || true
+
+# 4. Battery Longevity Health Cap: set 80% charge threshold to avoid battery swelling on 24/7 AC power
+for bat_thresh in /sys/class/power_supply/BAT*/charge_control_end_threshold; do
+    if [ -w "$bat_thresh" ]; then
+        echo 80 | sudo tee "$bat_thresh" > /dev/null || true
+    fi
+done
 ```
 
 #### 2. Disable Unnecessary Background Daemons
@@ -303,11 +321,36 @@ if ! command -v neofetch >/dev/null; then
     sudo curl -fsSL https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
     sudo chmod +x /usr/local/bin/neofetch
 fi
+
+# Install superfile terminal file manager
+if ! command -v spf >/dev/null; then
+    bash -c "$(curl -sLo- https://superfile.dev/install.sh)" || true
+fi
+
+# Install Herdr agent runtime orchestrator
+if ! command -v herdr >/dev/null; then
+    curl -fsSL https://herdr.dev/install.sh | sudo HERDR_INSTALL_DIR=/usr/local/bin sh || true
+fi
+
+# Install tuios terminal window manager with agent inbox
+if ! command -v tuios >/dev/null; then
+    bash -c "$(curl -fsSL https://raw.githubusercontent.com/Gaurav-Gosain/tuios/main/install.sh)" || true
+fi
+
+# Install official Ookla speedtest CLI
+if ! command -v speedtest >/dev/null; then
+    curl -fsSL https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+    sudo apt-get install -y speedtest
+fi
 ```
 
 #### Why These Specific Tools Matter for AI Agents & Admins:
 * **`fastfetch`**: Blazing-fast modern C system information fetcher with instant terminal rendering of CPU, GPU, memory, and OS metrics.
 * **`neofetch`**: Iconic classic system information profiling tool.
+* **`herdr`**: Dedicated agent runtime and multiplexer holding persistent terminal sessions and workspaces across reboots and devices.
+* **`tuios`**: Terminal window manager with tiling, pane agent status detection (working/waiting/done), and an aggregated approval Inbox.
+* **`speedtest`**: Official Ookla native C++ CLI for measuring Gigabit WAN throughput and ping latency.
+* **`superfile` (`spf`)**: Feature-rich terminal file manager with dual-pane browsing and syntax-highlighted file previews.
 * **`ripgrep` (`rg`)**: Search massive codebases in milliseconds. AI agents use this heavily for symbol & pattern discovery.
 * **`fd-find` (`fd`)**: Fast, intelligent alternative to `find` with default `.gitignore` awareness.
 * **`fzf`**: Interactive fuzzy finder for navigating paths, commands, and git commits.
@@ -333,11 +376,15 @@ printf "%-15s: %s\n" "uv" "$(uv --version 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "GitHub CLI" "$(gh --version 2>/dev/null | head -n1 || echo 'Missing')"
 printf "%-15s: %s\n" "Claude Code" "$(claude --version 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "Codex" "$(codex --version 2>/dev/null || echo 'Missing')"
+printf "%-15s: %s\n" "Herdr" "$(herdr --version 2>/dev/null || which herdr 2>/dev/null || echo 'Missing')"
+printf "%-15s: %s\n" "tuios" "$(tuios --version 2>/dev/null || which tuios 2>/dev/null || echo 'Missing')"
+printf "%-15s: %s\n" "speedtest" "$(which speedtest 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "T3 Code Service" "$(systemctl --user is-active t3-serve.service 2>/dev/null || echo 'Inactive')"
 printf "%-15s: %s\n" "ripgrep (rg)" "$(rg --version 2>/dev/null | head -n1 || echo 'Missing')"
 printf "%-15s: %s\n" "fd" "$(fd --version 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "fastfetch" "$(fastfetch --version 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "neofetch" "$(neofetch --version 2>/dev/null | head -n1 || echo 'Missing')"
+printf "%-15s: %s\n" "superfile (spf)" "$(which spf 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "btop" "$(which btop 2>/dev/null || echo 'Missing')"
 printf "%-15s: %s\n" "ZRAM Swap" "$(cat /proc/swaps | grep zram >/dev/null && echo 'Active' || echo 'Inactive')"
 echo "========================="
@@ -350,6 +397,10 @@ echo "========================="
 | Task | Command |
 | :--- | :--- |
 | **System Info Summary** | `fastfetch` or `neofetch` |
+| **Agent Sessions & Terminal Herds** | `herdr` |
+| **Tiling & Agent Approval Inbox** | `tuios` |
+| **Network Speed & Latency Test** | `speedtest --accept-license --accept-gdpr` |
+| **Terminal File Manager** | `spf` |
 | **Check Resource Usage** | `btop` or `htop` |
 | **Monitor T3 Code Server Logs** | `journalctl --user -u t3-serve.service -f` |
 | **Restart T3 Code Server** | `systemctl --user restart t3-serve.service` |

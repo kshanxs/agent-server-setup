@@ -1,6 +1,6 @@
 <div align="center">
 
-# Agent Server Setup
+# servermaxxing
 
 **Turn any Ubuntu Server, homelab box, laptop, or Proxmox instance into a dedicated, high-performance remote AI coding agent workstation.**
 
@@ -30,8 +30,9 @@ flowchart TD
     end
 
     subgraph Host["Agent Server Host (Bare Metal / Laptop / Proxmox VE)"]
-        subgraph Services["Core Agent Services"]
+        subgraph Services["Core Agent Services & Orchestration"]
             T3["T3 Code Server (Nightly on port 3773)"]
+            HERDR["Herdr (Agent Runtime & Multiplexer)"]
             CLAUDE["Claude Code CLI"]
             CODEX["Codex CLI"]
         end
@@ -44,7 +45,7 @@ flowchart TD
 
         subgraph Accelerators["CLI & System Accelerators"]
             SEARCH["ripgrep & fd-find"]
-            TERM["tmux, fzf, fastfetch & btop"]
+            TERM["tmux, tuios, fzf, fastfetch, superfile, speedtest & btop"]
             ZRAM["ZRAM (Compressed In-Memory Swap)"]
             LID["Lid Protection (No Suspend on Close)"]
         end
@@ -58,8 +59,11 @@ flowchart TD
 
     TS --> T3
     LAN --> T3
+    TS --> HERDR
 
     T3 --> Runtimes
+    HERDR --> CLAUDE
+    HERDR --> CODEX
     CLAUDE --> Runtimes
     CODEX --> Runtimes
 
@@ -72,17 +76,17 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A["1. Clone Repo"] --> B["2. Run Tuner Script"]
+    A["1. Clone Repo"] --> B["2. Run servermaxxing"]
     B --> C["3. Connect Tailscale"]
     C --> D["4. Start T3 Code / Agents"]
 ```
 
-Clone this repository and run the automated tuner on your Ubuntu server or VM:
+Clone this repository and run the automated tuner on your Ubuntu server, laptop, or VM:
 
 ```bash
-git clone https://github.com/kshanxs/agent-server-setup.git
-cd agent-server-setup
-sudo bash tune-server.sh
+git clone https://github.com/kshanxs/servermaxxing.git
+cd servermaxxing
+sudo bash servermaxxing.sh
 ```
 
 ---
@@ -90,12 +94,12 @@ sudo bash tune-server.sh
 ## 📂 Repository Structure
 
 ```
-agent-server-setup/
+servermaxxing/
 ├── README.md                     # Main project portal & architecture overview
 ├── LICENSE                       # MIT open source license
-├── tune-server.sh                # Root execution wrapper
+├── servermaxxing.sh              # Root execution entrypoint
 ├── scripts/
-│   └── tune-server.sh            # Automated server tuning & provisioning script
+│   └── servermaxxing.sh          # Automated server tuning & provisioning script
 └── docs/
     ├── setup.md                  # Comprehensive Ubuntu bare-metal setup guide
     ├── proxmox.md                # Proxmox VE (LXC & VM) deployment guide
@@ -111,7 +115,7 @@ agent-server-setup/
 | **[Ubuntu Server Setup Guide](docs/setup.md)** | End-to-end installation walkthrough covering base packages, non-interactive sudo, laptop lid policies, ZRAM swap, Docker, Tailscale, runtimes (`uv`, `vite-plus`), and AI agents (**T3 Code**, **Claude Code**, **Codex**). | Bare-metal servers, repurposed laptops, mini-PCs |
 | **[Proxmox VE Setup Guide](docs/proxmox.md)** | Guide for deploying dedicated agent nodes in Proxmox VE using lightweight unprivileged **LXC containers** (with Docker nesting & Tailscale tun pass-through) or **KVM VMs** (with Cloud-Init & GPU passthrough). Includes host optimizations. | Homelabs, hypervisors, VM clusters |
 | **[Multi-Node LAN Deployment](docs/multi-node-deployment.md)** | Dynamic architecture guide for decoupling **Development / Agent Nodes** from **Production / Database Nodes** on LAN or Tailscale. Covers zero-password SSH key auth, remote Docker contexts (`docker --context`), and GitOps webhooks. | Multi-machine LANs, dedicated DB/App split |
-| **[Automated Tuning Script](scripts/tune-server.sh)** | One-click bash script to disable bloat daemons, install Docker, configure in-memory ZRAM swap, install agent CLI utilities (`ripgrep`, `fd`, `fzf`, `fastfetch`, `neofetch`, `ncdu`, `tree`), and ensure continuous operation. | Fast automated provisioning |
+| **[Automated Tuning Script](scripts/servermaxxing.sh)** | Adaptive first-run provisioning engine that auto-detects **VPS vs. Laptop vs. Bare-Metal**, disables bloat daemons, masks sleep/suspend, configures 24/7 laptop lid & battery health caps, sets up **Tailscale Mesh VPN**, **Docker Engine**, in-memory **ZRAM swap**, modern runtimes (**`uv`**, **`Vite+`**), and agent CLI utilities. | Fast automated provisioning for VPS, laptops & homelabs |
 
 ---
 
@@ -119,7 +123,8 @@ agent-server-setup/
 
 | Layer | Component | Description |
 | :--- | :--- | :--- |
-| **Agent Daemons** | **T3 Code (Nightly)** | Collaborative browser & editor server running as a persistent systemd service |
+| **Agent Daemons & Orchestration** | **T3 Code (Nightly)** | Collaborative browser & editor server running as a persistent systemd service |
+| | **Herdr (`herdr`)** | Dedicated agent runtime holding persistent terminal sessions across machines |
 | | **Claude Code** | Anthropic's official agentic terminal assistant |
 | | **Codex** | Independent agent CLI & developer execution environment |
 | **Remote Access** | **Tailscale** | Encrypted WireGuard-based private mesh network with zero open public ports |
@@ -129,12 +134,15 @@ agent-server-setup/
 | | **GitHub CLI (`gh`)** | Fast repository management and PR workflows directly from terminal |
 | **Performance Tuning** | **ZRAM (`zstd`)** | In-memory compressed RAM swap preventing disk thrashing on heavy agent builds |
 | | **Lid Protection** | Prevents suspension on laptop servers when closed or unplugged |
-| **CLI Accelerators** | **ripgrep (`rg`)** | Blazing-fast symbol and pattern search across large codebases |
+| **CLI Accelerators & Multiplexing** | **tuios (`tuios`)** | Terminal window manager with tiling, agent pane detection, and aggregated approval Inbox |
+| | **tmux** | Terminal multiplexer for persistent sessions |
+| | **ripgrep (`rg`)** | Blazing-fast symbol and pattern search across large codebases |
 | | **fd-find (`fd`)** | Smart, fast directory and file finding |
 | | **fzf** | Interactive command-line fuzzy finder |
 | | **fastfetch & neofetch**| Instant system and hardware information fetchers |
+| | **superfile (`spf`)** | Modern terminal file manager with multi-panel exploration and preview |
+| | **speedtest** | Official Ookla native speedtest CLI for WAN bandwidth and latency diagnostics |
 | | **btop & htop** | Visual real-time CPU, memory, and process tree monitors |
-| | **tmux** | Terminal multiplexer for persistent sessions |
 
 ---
 
