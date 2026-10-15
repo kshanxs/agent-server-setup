@@ -35,7 +35,17 @@ sudo bash servermaxxing.sh
 
 Or via direct one-liner:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/servermaxxing.sh | sudo bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+```
+
+Direct agent auto-launch (e.g. Claude Code or Codex):
+```bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+```
+
+On a fresh root-only cloud VPS:
+```bash
+apt-get update -y && apt-get install -y curl && id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev) && su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude"
 ```
 
 The script automatically detects:

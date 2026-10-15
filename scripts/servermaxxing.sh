@@ -8,7 +8,29 @@ echo "          servermaxxing : agent box tuner             "
 echo "======================================================"
 
 TARGET_USER="${SUDO_USER:-$(logname 2>/dev/null || id -un)}"
-echo "Target user: ${TARGET_USER}"
+TARGET_HOME="$(getent passwd "$TARGET_USER" 2>/dev/null | cut -d: -f6 || eval echo ~"$TARGET_USER")"
+echo "Target user: ${TARGET_USER} (Home: ${TARGET_HOME})"
+
+AGENT_CHOICE="${AGENT:-none}"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --agent|-a)
+            AGENT_CHOICE="${2:-none}"
+            shift 2 2>/dev/null || shift 1
+            ;;
+        --agent=*)
+            AGENT_CHOICE="${1#*=}"
+            shift
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+if [ "$AGENT_CHOICE" != "none" ]; then
+    echo "Selected Agent Auto-Launch: ${AGENT_CHOICE}"
+fi
 
 # 0. Dynamic Hardware & Virtualization Environment Detection
 echo "[0/7] Detecting Host Environment & Hardware..."
@@ -193,12 +215,24 @@ if ! command -v vp >/dev/null 2>&1; then
     echo "Installing Vite+ (vp) runtime..."
     if id "$TARGET_USER" &>/dev/null; then
         su - "$TARGET_USER" -c 'curl -fsSL https://vite.plus | VP_NODE_MANAGER="yes" bash' 2>/dev/null || true
-        VP_BIN_LOC=$(find "/home/${TARGET_USER}/.vite-plus" "/home/${TARGET_USER}/.local/share/vite-plus" -name "vp" -type f 2>/dev/null | head -n1 || true)
+        TARGET_HOME="$(getent passwd "$TARGET_USER" 2>/dev/null | cut -d: -f6 || eval echo ~"$TARGET_USER")"
+        VP_BIN_LOC=$(find "${TARGET_HOME}/.vite-plus" "${TARGET_HOME}/.local/share/vite-plus" -name "vp" -type f 2>/dev/null | head -n1 || true)
         if [ -n "$VP_BIN_LOC" ] && [ -x "$VP_BIN_LOC" ]; then
             ln -sf "$VP_BIN_LOC" /usr/local/bin/vp
             echo "Symlinked Vite+ (vp) to /usr/local/bin/vp."
         fi
     fi
+fi
+
+# Optional Agent CLI installations
+if [ "$AGENT_CHOICE" = "claude" ] && ! command -v claude >/dev/null 2>&1; then
+    echo "Installing Claude Code CLI (@anthropic-ai/claude-code)..."
+    npm install -g @anthropic-ai/claude-code || true
+fi
+
+if [ "$AGENT_CHOICE" = "codex" ] && ! command -v codex >/dev/null 2>&1; then
+    echo "Installing Codex CLI (@codex-ai/cli)..."
+    npm install -g @codex-ai/cli || true
 fi
 
 # 6. Install Docker, Docker Compose & Tailscale Mesh VPN
@@ -248,4 +282,50 @@ echo " Docker:      $(command -v docker >/dev/null && echo 'Ready' || echo 'Miss
 echo " Tailscale:   $(command -v tailscale >/dev/null && echo 'Ready' || echo 'Missing')"
 echo " uv / uvx:    $(command -v uv >/dev/null && echo 'Ready' || echo 'Missing')"
 echo " Vite+ (vp):  $(command -v vp >/dev/null && echo 'Ready' || echo 'Missing')"
+echo " Claude Code: $(command -v claude >/dev/null && echo 'Ready' || echo 'Not installed')"
+echo " Codex CLI:   $(command -v codex >/dev/null && echo 'Ready' || echo 'Not installed')"
+echo " Herdr / TUI: $(command -v herdr >/dev/null && echo 'Ready' || echo 'Missing')"
 echo "======================================================"
+
+# 8. Automated Agent Auto-Launch (if requested via --agent / AGENT)
+if [ "$AGENT_CHOICE" != "none" ]; then
+    # Seed servermaxxing skill context into target user's workspace
+    mkdir -p "${TARGET_HOME}/.agents/skills/servermaxxing"
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
+    if [ -n "$SCRIPT_DIR" ] && [ -f "${SCRIPT_DIR}/../.agents/skills/servermaxxing/SKILL.md" ]; then
+        cp -f "${SCRIPT_DIR}/../.agents/skills/servermaxxing/SKILL.md" "${TARGET_HOME}/.agents/skills/servermaxxing/SKILL.md" 2>/dev/null || true
+    elif [ -n "$SCRIPT_DIR" ] && [ -f "${SCRIPT_DIR}/.agents/skills/servermaxxing/SKILL.md" ]; then
+        cp -f "${SCRIPT_DIR}/.agents/skills/servermaxxing/SKILL.md" "${TARGET_HOME}/.agents/skills/servermaxxing/SKILL.md" 2>/dev/null || true
+    else
+        curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/.agents/skills/servermaxxing/SKILL.md -o "${TARGET_HOME}/.agents/skills/servermaxxing/SKILL.md" 2>/dev/null || true
+    fi
+    chown -R "${TARGET_USER}:${TARGET_USER}" "${TARGET_HOME}/.agents" 2>/dev/null || true
+
+    if [ -t 0 ] || [ -c /dev/stdin ]; then
+        echo ""
+        echo ">>> Launching agent '${AGENT_CHOICE}' as user '${TARGET_USER}'..."
+        case "$AGENT_CHOICE" in
+            claude)
+                exec su - "${TARGET_USER}" -c 'cd ~ && claude "Review and audit this machine against servermaxxing standards. Check sleep masking, battery caps, ZRAM swap, Docker, and Tailscale."'
+                ;;
+            codex)
+                exec su - "${TARGET_USER}" -c 'cd ~ && codex "Review and audit this machine against servermaxxing standards. Check sleep masking, battery caps, ZRAM swap, Docker, and Tailscale."'
+                ;;
+            herdr)
+                exec su - "${TARGET_USER}" -c 'herdr'
+                ;;
+            tuios)
+                exec su - "${TARGET_USER}" -c 'tuios'
+                ;;
+            *)
+                echo "Unrecognized agent: ${AGENT_CHOICE}. Available: claude, codex, herdr, tuios."
+                ;;
+        esac
+    else
+        echo ""
+        echo "Notice: Non-interactive terminal detected. Skipping agent auto-launch."
+        echo "To open your agent now as ${TARGET_USER}, run:"
+        echo "  su - ${TARGET_USER} -c '${AGENT_CHOICE}'"
+    fi
+fi
+

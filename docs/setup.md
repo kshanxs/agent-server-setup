@@ -6,13 +6,41 @@ A complete, production-ready guide to configuring a fresh **Ubuntu Server** (or 
 
 ## 1. Quick Start: All-in-One Automated Setup
 
-If you want to run everything at once on a fresh machine, copy and run this unified script as root (or with `sudo`):
+### A. Direct One-Liner (Standard Sudo User)
+If you already have a standard user with `sudo` access, run using bash process substitution (protects `stdin` and eliminates partial-download corruption):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/servermaxxing.sh | sudo bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
 ```
 
-*(Or follow the step-by-step sections below for full visibility and control).*
+### B. Fresh Cloud VPS / Root Login Sequence
+On a freshly provisioned cloud VPS (where you are logged in directly as `root` and `curl` may not be installed):
+
+```bash
+# 1. Ensure curl is present and create a dedicated non-root agent user
+apt-get update -y && apt-get install -y curl
+id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev)
+
+# 2. Execute servermaxxing as the non-root user
+su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)"
+```
+
+### C. Agent Auto-Launch (Hands-Free Handoff to Claude / Codex)
+Pass the `--agent <name>` flag to automatically provision the box and immediately launch an interactive coding agent inside an unprivileged user session with the `servermaxxing` skill pre-loaded:
+
+```bash
+# Hands-free handoff to Claude Code:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+
+# Hands-free handoff to Codex CLI:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
+```
+
+> [!TIP]
+> **Tailscale Automated Join:** Pass `TAILSCALE_AUTHKEY="tskey-auth-..."` before `bash` to authenticate immediately without waiting for interactive OAuth URLs.
+
+*(Or follow the step-by-step sections below for full visibility and granular control).*
+
 
 ---
 

@@ -81,12 +81,53 @@ flowchart LR
     C --> D["4. Start T3 Code / Agents"]
 ```
 
-Clone this repository and run the automated tuner on your Ubuntu server, laptop, or VM:
+### Method 1: Instant One-Liner (Recommended for Existing Ubuntu/Debian Servers)
+
+Run directly on your target server using process substitution (preserves `stdin` and avoids interactive truncation):
+
+```bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+```
+
+> [!TIP]
+> **Fresh Cloud VPS / Root Logins:** On a newly created cloud VM (DigitalOcean, Hetzner, Linode) where you are logged in as `root` without `curl` or a standard user, create a dedicated agent user first to keep container runtimes and files out of `/root`:
+> ```bash
+> apt-get update -y && apt-get install -y curl
+> id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev)
+> su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)"
+> ```
+
+> [!NOTE]
+> **Tailscale Pre-Authentication:** To have the node connect to Tailscale automatically without interactive prompts, pass your auth key:
+> ```bash
+> sudo TAILSCALE_AUTHKEY="tskey-auth-..." bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+> ```
+
+### Method 2: Agent Auto-Launch (Provision & Hand Off Directly to Claude / Codex)
+
+If you want the machine tuned and immediately handed over to an interactive coding agent to verify, inspect, or manage the box:
+
+```bash
+# Launch Claude Code directly after servermaxxing:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+
+# Launch Codex CLI directly after servermaxxing:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
+
+# Launch persistent Herdr / TUI multi-agent workspace:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent herdr
+```
+
+> [!IMPORTANT]
+> The script automatically installs the requested agent CLI, seeds the `servermaxxing` skill into `~/.agents/skills/`, and drops privileges from `root` to your normal user account so agents run securely with standard user ownership.
+
+### Method 3: Clone & Run (For Full Visibility & Custom Tweaks)
 
 ```bash
 git clone https://github.com/kshanxs/servermaxxing.git
 cd servermaxxing
 sudo bash servermaxxing.sh
+# Or pass --agent claude / --agent codex
 ```
 
 ---
