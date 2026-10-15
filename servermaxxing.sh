@@ -8,5 +8,7 @@ if [ -n "$SCRIPT_DIR" ] && [ -f "${SCRIPT_DIR}/scripts/servermaxxing.sh" ]; then
     exec bash "${SCRIPT_DIR}/scripts/servermaxxing.sh" "$@"
 else
     # Fallback when curled directly without local repo clone
-    exec bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) "$@"
+    TMP_SCRIPT="$(mktemp /tmp/servermaxxing.XXXXXX.sh)"
+    curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o "$TMP_SCRIPT"
+    exec bash "$TMP_SCRIPT" "$@"
 fi

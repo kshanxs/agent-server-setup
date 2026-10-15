@@ -13,10 +13,10 @@
 <br/>
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh
 ```
 
-**One curl. Zero bloat. Fully tuned for autonomous coding agents.**
+**One command. Zero bloat. Fully tuned for autonomous coding agents.**
 
 </div>
 
@@ -43,7 +43,7 @@ When you spin up a fresh VPS, repurpose a spare laptop, or spin an LXC container
 Tuning takes under 60 seconds on Ubuntu 22.04 / 24.04:
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh
 ```
 
 ---
@@ -53,22 +53,22 @@ Tune the server and immediately drop into an active agent session with the `serv
 
 **Anthropic Claude Code:**
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh --agent claude
 ```
 
 **Codex CLI:**
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh --agent codex
 ```
 
 **tuios (Tiling Window Manager with Agent Approval Inbox):**
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent tuios
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh --agent tuios
 ```
 
 **Herdr (Persistent Agent Session Multiplexer):**
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent herdr
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh --agent herdr
 ```
 
 > [!NOTE]
@@ -82,13 +82,13 @@ On a brand new VPS where you are logged in directly as `root`:
 ```bash
 apt-get update -y && apt-get install -y curl
 id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev)
-su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)"
+su - dev -c "curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh"
 ```
 
 > [!TIP]
 > **Zero-Touch Tailscale Auth:** Pass your pre-auth key to join your private mesh silently without manual web verification:
 > ```bash
-> sudo TAILSCALE_AUTHKEY="tskey-auth-..." bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+> curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo TAILSCALE_AUTHKEY="tskey-auth-..." bash /tmp/servermaxxing.sh
 > ```
 
 ---

@@ -7,10 +7,10 @@ A complete, production-ready guide to configuring a fresh **Ubuntu Server** (or 
 ## 1. Quick Start: All-in-One Automated Setup
 
 ### A. Direct One-Liner (Standard Sudo User)
-If you already have a standard user with `sudo` access, run using bash process substitution (protects `stdin` and eliminates partial-download corruption):
+If you already have a standard user with `sudo` access, download to a temporary script and run with `sudo` (protects `stdin`, allows full interactive agent hand-off, and prevents partial-download execution):
 
 ```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh
 ```
 
 ### B. Fresh Cloud VPS / Root Login Sequence
@@ -22,7 +22,7 @@ apt-get update -y && apt-get install -y curl
 id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev)
 
 # 2. Execute servermaxxing as the non-root user
-su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)"
+su - dev -c "curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh"
 ```
 
 ### C. Agent Auto-Launch (Hands-Free Handoff to Claude / Codex)
@@ -30,10 +30,10 @@ Pass the `--agent <name>` flag to automatically provision the box and immediatel
 
 ```bash
 # Hands-free handoff to Claude Code:
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh --agent claude
 
 # Hands-free handoff to Codex CLI:
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
+curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh -o /tmp/servermaxxing.sh && sudo bash /tmp/servermaxxing.sh --agent codex
 ```
 
 > [!TIP]
