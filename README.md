@@ -1,16 +1,118 @@
 <div align="center">
 
-# servermaxxing
+# ⚡ servermaxxing
 
-**Turn any Ubuntu Server, homelab box, laptop, or Proxmox instance into a dedicated, high-performance remote AI coding agent workstation.**
+### Turn dusty laptops, cheap VPS instances, and homelab boxes into autonomous 24/7 AI agent workstations.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Platform: Ubuntu](https://img.shields.io/badge/Platform-Ubuntu%2022.04%20%7C%2024.04%20%7C%2026.04-orange.svg)](#)
-[![Virtualization: Proxmox](https://img.shields.io/badge/Virtualization-Proxmox%20VE-E57000.svg)](docs/proxmox.md)
-[![Architecture: Multi-Node](https://img.shields.io/badge/Architecture-Multi--Node%20Deploy-purple.svg)](docs/multi-node-deployment.md)
-[![Mesh VPN: Tailscale](https://img.shields.io/badge/VPN-Tailscale-24292e.svg)](https://tailscale.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Platform: Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%20%7C%2024.04%20%7C%2026.04-orange.svg?style=flat-square)](#)
+[![Mesh VPN: Tailscale](https://img.shields.io/badge/Mesh%20VPN-Tailscale-24292e.svg?style=flat-square)](https://tailscale.com)
+[![Runtimes: uv + Vite+](https://img.shields.io/badge/Runtimes-uv%20%7C%20Vite%2B-green.svg?style=flat-square)](#-the-stack)
+[![Multiplexing: tuios + herdr](https://img.shields.io/badge/TUI-tuios%20%7C%20herdr-8A2BE2.svg?style=flat-square)](#-the-stack)
+
+<br/>
+
+```bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+```
+
+**One curl. Zero bloat. Fully tuned for autonomous coding agents.**
 
 </div>
+
+---
+
+## 💀 The Problem: Raw Linux is Horrible for AI Agents
+
+When you spin up a fresh VPS, repurpose a spare laptop, or spin an LXC container for autonomous coding agents (Claude Code, Codex, Aider), you hit immediate friction:
+
+| Raw Server Default | What Happens When An Agent Runs | `servermaxxing` Fix |
+| :--- | :--- | :--- |
+| **Lid Closes / Idles** | Box immediately suspends, killing your agent mid-task. | **Permanent lid & sleep masking** — runs 24/7 with the lid closed. |
+| **Heavy Builds (npm/pip/docker)** | 4GB–8GB boxes thrash the SSD swap, freeze, and OOM kill. | **In-memory ZRAM (zstd, 50% RAM)** — doubles effective memory speed. |
+| **Laptop Battery on AC** | Lithium battery sits at 100% heat stress until it swells. | **Automated 80% charge threshold** cap to preserve battery health. |
+| **Port Forwarding / SSH** | Exposing port 22 or web editors to public WAN gets probed. | **Tailscale Mesh VPN** — zero open public ports, accessible worldwide. |
+| **Sudo Password Prompts** | Agent hangs indefinitely waiting for non-interactive sudo. | **Scoped non-interactive sudoers rule** for agent execution. |
+| **Tooling Gaps** | Agent lacks fast search tools and wastes tokens doing `find /`. | **`ripgrep`, `fd`, `fzf`, `superfile`, `tuios`, `fastfetch` pre-installed.** |
+
+---
+
+## ⚡ Quick Start: One-Liners
+
+### 1. Instant Servermax (Recommended)
+Tuning takes under 60 seconds on Ubuntu 22.04 / 24.04:
+
+```bash
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+```
+
+---
+
+### 2. Auto-Launch & Agent Hand-Off
+Tune the server and immediately drop into an active agent session with the `servermaxxing` skill pre-seeded:
+
+```bash
+# Launch Anthropic Claude Code immediately after tuning:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+
+# Launch Codex CLI immediately after tuning:
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
+
+# Launch tuios (Terminal Window Manager with Agent Inbox):
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent tuios
+
+# Launch Herdr (Persistent Agent Session Multiplexer):
+sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent herdr
+```
+
+> [!NOTE]
+> The script automatically installs the requested agent CLI, seeds the `servermaxxing` skill into `~/.agents/skills/`, and drops root privileges so your agent runs safely under your standard user.
+
+---
+
+### 3. Headless Cloud VPS (DigitalOcean / Hetzner / Linode)
+On a brand new VPS where you are logged in directly as `root`:
+
+```bash
+apt-get update -y && apt-get install -y curl
+id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev)
+su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)"
+```
+
+> [!TIP]
+> **Zero-Touch Tailscale Auth:** Pass your pre-auth key to join your private mesh silently without manual web verification:
+> ```bash
+> sudo TAILSCALE_AUTHKEY="tskey-auth-..." bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
+> ```
+
+---
+
+## 🛠️ The Stack: What Gets Maxxed
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        SERVERMAXXED ENVIRONMENT                        │
+├────────────────────────────────┬───────────────────────────────────────┤
+│ 🤖 Agent Runtimes & Daemons    │ Claude Code · Codex CLI · T3 Code     │
+│ 🪟 Multiplexers & Terminal UI  │ tuios · herdr · tmux · superfile (spf)│
+│ ⚡ Modern Language Engines      │ uv & uvx (Python) · Vite+ (Node & Bun)│
+│ 🐳 Container Runtime           │ Docker Engine 29.x & Compose v2       │
+│ 🔒 Mesh Networking             │ Tailscale WireGuard (Zero Open Ports) │
+│ 🚀 System Accelerators         │ ZRAM (zstd swap) · ripgrep · fd · fzf │
+│ 🛡️ Hardware Defense (Laptops)  │ Lid-ignore · Sleep-mask · 80% Batt Cap│
+└────────────────────────────────┴───────────────────────────────────────┘
+```
+
+### Detailed Layer Breakdown
+
+| Layer | Tools | Why It Matters for Agents |
+| :--- | :--- | :--- |
+| **Hardware & Power** | `logind.conf.d`, `systemd mask`, `charge_control_limit` | **24/7 continuous uptime.** Shuts down display sleep, ignores clamshell closure, and caps battery charging at 80% to stop swollen batteries. |
+| **Memory & Storage** | `zram-tools` (`zstd`, 50% RAM) | Agents run resource-hungry builds. ZRAM compresses pages directly in memory, preventing system stalls and NVMe/SSD wear. |
+| **Agent Multiplexing** | **`tuios`** & **`herdr`** | Tile multiple running agents, manage approvals in a unified inbox, and reconnect to sessions across devices without dropping state. |
+| **Fast Runtimes** | **`uv` / `uvx`** & **`Vite+` (`vp`)** | Instantly executes Python scripts and virtual environments at 10x-100x pip speeds. Fast Node/Bun management without version managers breaking. |
+| **CLI Speed Pack** | `ripgrep`, `fd-find`, `fzf`, `superfile`, `btop`, `fastfetch`, `speedtest` | High-efficiency terminal tools. Gives agents sub-millisecond code exploration commands so they don't burn tokens on slow bash pipelines. |
+| **Access & Security** | `tailscale`, rootless `docker`, scoped `sudoers` | Connect from your MacBook, phone, or desktop with 0 open firewall ports. Agent executes Docker and system tasks without authentication deadlocks. |
 
 ---
 
@@ -18,183 +120,69 @@
 
 ```mermaid
 flowchart TD
-    subgraph Clients["Client Devices (Workstations & Mobile)"]
+    subgraph Clients["Your Devices (Anywhere)"]
         MAC["MacBook / Laptop"]
-        DESK["Linux / Windows Desktop"]
-        PHONE["Mobile / Tablet"]
+        DESK["Workstation"]
+        PHONE["Phone / Tablet"]
     end
 
-    subgraph Network["Secure Private Mesh Network"]
-        TS["Tailscale Mesh VPN (Zero Open Ports)"]
-        LAN["Local Gigabit LAN (< 1ms Latency)"]
+    subgraph Network["Tailscale Encrypted Mesh (Zero Public Ports)"]
+        TS["Tailscale WireGuard Mesh"]
     end
 
-    subgraph Host["Agent Server Host (Bare Metal / Laptop / Proxmox VE)"]
-        subgraph Services["Core Agent Services & Orchestration"]
-            T3["T3 Code Server (Nightly on port 3773)"]
-            HERDR["Herdr (Agent Runtime & Multiplexer)"]
+    subgraph Server["Servermaxxed Host (Laptop / VPS / Proxmox VE)"]
+        subgraph Orchestration["Agent Workspaces & Multiplexers"]
+            TUI["tuios (Tiling & Agent Approval Inbox)"]
+            HERDR["herdr (Persistent Terminal Sessions)"]
+            T3["T3 Code Server (Nightly Browser Editor)"]
+        end
+
+        subgraph Agents["Autonomous AI Agents"]
             CLAUDE["Claude Code CLI"]
             CODEX["Codex CLI"]
         end
 
-        subgraph Runtimes["Modern Runtimes & Containers"]
-            DOCKER["Docker Engine 29.x & Compose v2"]
-            VITE["Vite+ Runtime (Node.js 24 + Bun)"]
+        subgraph Engine["Runtimes & Containers"]
+            DOCKER["Docker Engine & Compose"]
             UV["uv & uvx (Fast Rust Python)"]
+            VP["Vite+ Runtime (Node.js & Bun)"]
         end
 
-        subgraph Accelerators["CLI & System Accelerators"]
-            SEARCH["ripgrep & fd-find"]
-            TERM["tmux, tuios, fzf, fastfetch, superfile, speedtest & btop"]
-            ZRAM["ZRAM (Compressed In-Memory Swap)"]
-            LID["Lid Protection (No Suspend on Close)"]
+        subgraph Kernel["OS & Hardware Optimization"]
+            ZRAM["ZRAM (zstd Compressed RAM Swap)"]
+            LID["Lid Protection & 80% Battery Cap"]
+            CLI["ripgrep · fd · fzf · superfile · btop"]
         end
     end
 
-    MAC --> TS
-    DESK --> TS
-    PHONE --> TS
-    MAC --> LAN
-    DESK --> LAN
-
-    TS --> T3
-    LAN --> T3
-    TS --> HERDR
-
-    T3 --> Runtimes
-    HERDR --> CLAUDE
-    HERDR --> CODEX
-    CLAUDE --> Runtimes
-    CODEX --> Runtimes
-
-    Runtimes --> Accelerators
+    MAC & DESK & PHONE --> TS
+    TS --> Orchestration
+    Orchestration --> Agents
+    Agents --> Engine
+    Engine --> Kernel
 ```
 
 ---
 
-## ⚡ Quick Start
+## 📚 Deep Dive Guides
 
-```mermaid
-flowchart LR
-    A["1. Clone Repo"] --> B["2. Run servermaxxing"]
-    B --> C["3. Connect Tailscale"]
-    C --> D["4. Start T3 Code / Agents"]
-```
+Looking to build a homelab cluster or optimize a specific virtualization stack? Check out the full guides:
 
-### Method 1: Instant One-Liner (Recommended for Existing Ubuntu/Debian Servers)
-
-Run directly on your target server using process substitution (preserves `stdin` and avoids interactive truncation):
-
-```bash
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
-```
-
-> [!TIP]
-> **Fresh Cloud VPS / Root Logins:** On a newly created cloud VM (DigitalOcean, Hetzner, Linode) where you are logged in as `root` without `curl` or a standard user, create a dedicated agent user first to keep container runtimes and files out of `/root`:
-> ```bash
-> apt-get update -y && apt-get install -y curl
-> id -u dev &>/dev/null || (adduser --disabled-password --gecos "" dev && usermod -aG sudo dev)
-> su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)"
-> ```
-
-> [!NOTE]
-> **Tailscale Pre-Authentication:** To have the node connect to Tailscale automatically without interactive prompts, pass your auth key:
-> ```bash
-> sudo TAILSCALE_AUTHKEY="tskey-auth-..." bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh)
-> ```
-
-### Method 2: Agent Auto-Launch (Provision & Hand Off Directly to Claude / Codex)
-
-If you want the machine tuned and immediately handed over to an interactive coding agent to verify, inspect, or manage the box:
-
-```bash
-# Launch Claude Code directly after servermaxxing:
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
-
-# Launch Codex CLI directly after servermaxxing:
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
-
-# Launch persistent Herdr / TUI multi-agent workspace:
-sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent herdr
-```
-
-> [!IMPORTANT]
-> The script automatically installs the requested agent CLI, seeds the `servermaxxing` skill into `~/.agents/skills/`, and drops privileges from `root` to your normal user account so agents run securely with standard user ownership.
-
-### Method 3: Clone & Run (For Full Visibility & Custom Tweaks)
-
-```bash
-git clone https://github.com/kshanxs/servermaxxing.git
-cd servermaxxing
-sudo bash servermaxxing.sh
-# Or pass --agent claude / --agent codex
-```
+- 📖 **[Ubuntu Server Setup Guide](docs/setup.md)** — Complete step-by-step walkthrough covering manual setups, Wi-Fi powersave tweaks, and tool configurations.
+- 🖥️ **[Proxmox VE Setup Guide](docs/proxmox.md)** — Optimized LXC containers with Docker nesting and Tailscale TUN pass-through, plus GPU passthrough for local models.
+- 🌐 **[Multi-Node LAN Deployment](docs/multi-node-deployment.md)** — Decouple heavy agent compute from production database nodes across local gigabit LAN.
 
 ---
 
-## 📂 Repository Structure
+## 🔒 Security Principles
 
-```
-servermaxxing/
-├── README.md                     # Main project portal & architecture overview
-├── LICENSE                       # MIT open source license
-├── servermaxxing.sh              # Root execution entrypoint
-├── scripts/
-│   └── servermaxxing.sh          # Automated server tuning & provisioning script
-└── docs/
-    ├── setup.md                  # Comprehensive Ubuntu bare-metal setup guide
-    ├── proxmox.md                # Proxmox VE (LXC & VM) deployment guide
-    └── multi-node-deployment.md  # Dynamic multi-node LAN deployment guide
-```
+1. **No Hardcoded Secrets**: All scripts use dynamic `$USER` and `$SUDO_USER` resolution with zero baked-in credentials.
+2. **Zero Inbound WAN Ports**: Remote access relies entirely on WireGuard state tunnels via Tailscale.
+3. **Least-Privilege Hand-Off**: Auto-launch drops privileges from root to the non-root host user immediately before starting agents.
 
 ---
 
-## 📖 Documentation & Guides
+## 📄 License & Author
 
-| Guide | Description | Target Use Case |
-| :--- | :--- | :--- |
-| **[Ubuntu Server Setup Guide](docs/setup.md)** | End-to-end installation walkthrough covering base packages, non-interactive sudo, laptop lid policies, ZRAM swap, Docker, Tailscale, runtimes (`uv`, `vite-plus`), and AI agents (**T3 Code**, **Claude Code**, **Codex**). | Bare-metal servers, repurposed laptops, mini-PCs |
-| **[Proxmox VE Setup Guide](docs/proxmox.md)** | Guide for deploying dedicated agent nodes in Proxmox VE using lightweight unprivileged **LXC containers** (with Docker nesting & Tailscale tun pass-through) or **KVM VMs** (with Cloud-Init & GPU passthrough). Includes host optimizations. | Homelabs, hypervisors, VM clusters |
-| **[Multi-Node LAN Deployment](docs/multi-node-deployment.md)** | Dynamic architecture guide for decoupling **Development / Agent Nodes** from **Production / Database Nodes** on LAN or Tailscale. Covers zero-password SSH key auth, remote Docker contexts (`docker --context`), and GitOps webhooks. | Multi-machine LANs, dedicated DB/App split |
-| **[Automated Tuning Script](scripts/servermaxxing.sh)** | Adaptive first-run provisioning engine that auto-detects **VPS vs. Laptop vs. Bare-Metal**, disables bloat daemons, masks sleep/suspend, configures 24/7 laptop lid & battery health caps, sets up **Tailscale Mesh VPN**, **Docker Engine**, in-memory **ZRAM swap**, modern runtimes (**`uv`**, **`Vite+`**), and agent CLI utilities. | Fast automated provisioning for VPS, laptops & homelabs |
+[MIT](LICENSE) © [kshanxs](https://github.com/kshanxs) (Shubhanshu Shukla)
 
----
-
-## 🛠️ The Agent Stack
-
-| Layer | Component | Description |
-| :--- | :--- | :--- |
-| **Agent Daemons & Orchestration** | **T3 Code (Nightly)** | Collaborative browser & editor server running as a persistent systemd service |
-| | **Herdr (`herdr`)** | Dedicated agent runtime holding persistent terminal sessions across machines |
-| | **Claude Code** | Anthropic's official agentic terminal assistant |
-| | **Codex** | Independent agent CLI & developer execution environment |
-| **Remote Access** | **Tailscale** | Encrypted WireGuard-based private mesh network with zero open public ports |
-| **Containers** | **Docker Engine & Compose** | Containerized services, test environments, and database stacks |
-| **Modern Runtimes** | **Vite+ (`vp`)** | High-performance JavaScript/TypeScript runtimes (Node.js & Bun) |
-| | **uv & uvx** | Ultra-fast Rust-based Python package manager and runner |
-| | **GitHub CLI (`gh`)** | Fast repository management and PR workflows directly from terminal |
-| **Performance Tuning** | **ZRAM (`zstd`)** | In-memory compressed RAM swap preventing disk thrashing on heavy agent builds |
-| | **Lid Protection** | Prevents suspension on laptop servers when closed or unplugged |
-| **CLI Accelerators & Multiplexing** | **tuios (`tuios`)** | Terminal window manager with tiling, agent pane detection, and aggregated approval Inbox |
-| | **tmux** | Terminal multiplexer for persistent sessions |
-| | **ripgrep (`rg`)** | Blazing-fast symbol and pattern search across large codebases |
-| | **fd-find (`fd`)** | Smart, fast directory and file finding |
-| | **fzf** | Interactive command-line fuzzy finder |
-| | **fastfetch & neofetch**| Instant system and hardware information fetchers |
-| | **superfile (`spf`)** | Modern terminal file manager with multi-panel exploration and preview |
-| | **speedtest** | Official Ookla native speedtest CLI for WAN bandwidth and latency diagnostics |
-| | **btop & htop** | Visual real-time CPU, memory, and process tree monitors |
-
----
-
-## 🔒 Security & Privacy
-
-* **No Credentials Stored**: All configs and scripts are completely generic and use system environment variables (`$USER`, `$SUDO_USER`).
-* **Zero Public Port Exposure**: All remote access operates over your private encrypted Tailscale network or local subnet.
-* **Non-Root Docker Execution**: Your primary user is placed in the `docker` group for rootless container operations.
-
----
-
-## 📄 License
-
-MIT License. Feel free to use, modify, and distribute for your own homelab or cloud server setups.
