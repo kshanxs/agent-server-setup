@@ -49,19 +49,25 @@ sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/m
 ---
 
 ### 2. Auto-Launch & Agent Hand-Off
-Tune the server and immediately drop into an active agent session with the `servermaxxing` skill pre-seeded:
+Tune the server and immediately drop into an active agent session with the `servermaxxing` skill pre-seeded. Pick your agent:
 
+**Anthropic Claude Code:**
 ```bash
-# Launch Anthropic Claude Code immediately after tuning:
 sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent claude
+```
 
-# Launch Codex CLI immediately after tuning:
+**Codex CLI:**
+```bash
 sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent codex
+```
 
-# Launch tuios (Terminal Window Manager with Agent Inbox):
+**tuios (Tiling Window Manager with Agent Approval Inbox):**
+```bash
 sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent tuios
+```
 
-# Launch Herdr (Persistent Agent Session Multiplexer):
+**Herdr (Persistent Agent Session Multiplexer):**
+```bash
 sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/servermaxxing/main/scripts/servermaxxing.sh) --agent herdr
 ```
 
@@ -119,47 +125,28 @@ su - dev -c "sudo bash <(curl -fsSL https://raw.githubusercontent.com/kshanxs/se
 ## 🏗️ System Architecture
 
 ```mermaid
-flowchart TD
-    subgraph Clients["Your Devices (Anywhere)"]
-        MAC["MacBook / Laptop"]
-        DESK["Workstation"]
-        PHONE["Phone / Tablet"]
+flowchart LR
+    subgraph Clients["1. Client Devices"]
+        direction TB
+        C1["MacBook / Desktop / Mobile"]
     end
 
-    subgraph Network["Tailscale Encrypted Mesh (Zero Public Ports)"]
-        TS["Tailscale WireGuard Mesh"]
+    subgraph Mesh["2. Private Mesh"]
+        direction TB
+        TS["Tailscale WireGuard<br/><i>(0 Open WAN Ports)</i>"]
     end
 
-    subgraph Server["Servermaxxed Host (Laptop / VPS / Proxmox VE)"]
-        subgraph Orchestration["Agent Workspaces & Multiplexers"]
-            TUI["tuios (Tiling & Agent Approval Inbox)"]
-            HERDR["herdr (Persistent Terminal Sessions)"]
-            T3["T3 Code Server (Nightly Browser Editor)"]
-        end
-
-        subgraph Agents["Autonomous AI Agents"]
-            CLAUDE["Claude Code CLI"]
-            CODEX["Codex CLI"]
-        end
-
-        subgraph Engine["Runtimes & Containers"]
-            DOCKER["Docker Engine & Compose"]
-            UV["uv & uvx (Fast Rust Python)"]
-            VP["Vite+ Runtime (Node.js & Bun)"]
-        end
-
-        subgraph Kernel["OS & Hardware Optimization"]
-            ZRAM["ZRAM (zstd Compressed RAM Swap)"]
-            LID["Lid Protection & 80% Battery Cap"]
-            CLI["ripgrep · fd · fzf · superfile · btop"]
-        end
+    subgraph Host["3. Servermaxxed Host (Laptop / VPS / Proxmox)"]
+        direction TB
+        AGENTS["Agents: Claude Code · Codex · Herdr · tuios · T3"]
+        STACK["Runtimes: Docker Engine · uv · Vite+ (Node/Bun)"]
+        KERNEL["Kernel: ZRAM (zstd) · Lid-Ignore · 80% Battery Cap"]
+        
+        AGENTS --> STACK --> KERNEL
     end
 
-    MAC & DESK & PHONE --> TS
-    TS --> Orchestration
-    Orchestration --> Agents
-    Agents --> Engine
-    Engine --> Kernel
+    Clients -->|Encrypted WireGuard| Mesh
+    Mesh -->|Local / Tailscale IP| Host
 ```
 
 ---
